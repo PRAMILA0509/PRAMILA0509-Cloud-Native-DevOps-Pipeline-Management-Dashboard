@@ -22,7 +22,7 @@ jobs:
           java-version: '21'
 
       - name: Build backend (Maven)
-        run: mvn -B clean verify --file backend/pom.xml
+        run: mvn -B clean verify --file devops/devops/pom.xml
 
       # Node/React build
       - name: Set up Node
