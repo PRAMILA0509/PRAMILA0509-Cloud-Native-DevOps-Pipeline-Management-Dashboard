@@ -1,9 +1,9 @@
 package com.backend.devops.controller;
 
 import com.backend.devops.model.Build;
-import com.backend.devops.model.Repo;
 import com.backend.devops.service.BuildService;
-import com.backend.devops.service.RepoService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,23 +14,23 @@ import java.util.List;
 public class BuildController {
 
     private final BuildService buildService;
-    private final RepoService repoService;
 
-    public BuildController(BuildService buildService, RepoService repoService) {
+    public BuildController(BuildService buildService) {
         this.buildService = buildService;
-        this.repoService = repoService;
     }
 
+    // Add a build (pipeline run) for a repo
     @PostMapping
-    public Build addBuild(@PathVariable Long repoId, @RequestBody Build build) {
-        Repo repo = repoService.getRepoById(repoId);
-        build.setRepo(repo);
-        return buildService.saveBuild(build);
+    public ResponseEntity<Build> addBuild(@PathVariable Long repoId, @RequestBody Build build) {
+        Build savedBuild = buildService.addBuildToRepo(repoId, build);
+        if (savedBuild == null) return ResponseEntity.notFound().build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedBuild);
     }
 
+    // Get builds for a repo (latest builds)
     @GetMapping
-    public List<Build> getBuilds(@PathVariable Long repoId) {
-        Repo repo = repoService.getRepoById(repoId);
-        return buildService.getLastBuilds(repo);
+    public ResponseEntity<List<Build>> getBuilds(@PathVariable Long repoId) {
+        List<Build> builds = buildService.getBuildsForRepo(repoId);
+        return ResponseEntity.ok(builds);
     }
 }

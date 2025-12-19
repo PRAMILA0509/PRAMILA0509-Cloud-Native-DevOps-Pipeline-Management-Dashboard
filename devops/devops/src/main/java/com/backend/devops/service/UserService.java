@@ -15,39 +15,18 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    // SIGN UP
+    // Sign-up / save user
     public User saveUser(User user) {
-
-        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            throw new RuntimeException("Email already exists");
-        }
-
+        // Optional: hash password here later
         return userRepository.save(user);
     }
 
-    // LOGIN (NO JWT)
+    // Login (no JWT)
     public User login(String email, String password) {
-
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        if (!user.getPassword().equals(password)) {
-            throw new RuntimeException("Invalid password");
-        }
-
-        return user;
+        return userRepository.findByEmailAndPassword(email, password).orElse(null);
     }
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
-    }
-
-    public User getUserById(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-    }
-
-    public void deleteUser(Long id) {
-        userRepository.deleteById(id);
     }
 }
