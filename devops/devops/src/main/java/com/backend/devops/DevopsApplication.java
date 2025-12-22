@@ -8,7 +8,6 @@ public class DevopsApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(DevopsApplication.class, args);
-		System.out.println("Welcome to devops pipeline management system!!");
 	}
 
 }
