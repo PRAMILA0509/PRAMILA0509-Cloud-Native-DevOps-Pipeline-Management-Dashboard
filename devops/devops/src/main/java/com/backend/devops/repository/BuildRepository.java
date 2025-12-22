@@ -8,7 +8,5 @@ import java.util.List;
 
 public interface BuildRepository extends JpaRepository<Build, Long> {
 
-    // Get builds for a repo, ordered by timestamp descending (latest first)
     List<Build> findByRepoOrderByStartTimeDesc(Repo repo);
-
 }

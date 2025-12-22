@@ -4,7 +4,7 @@ import com.backend.devops.model.Build;
 import com.backend.devops.model.BuildStatus;
 import com.backend.devops.model.Repo;
 import com.backend.devops.repository.BuildRepository;
-import com.backend.devops.repository.RepoRepository;
+import com.backend.devops.websocket.BuildEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -14,46 +14,53 @@ import java.util.List;
 public class BuildService {
 
     private final BuildRepository buildRepository;
-    private final RepoRepository repoRepository;
+    private final BuildEventPublisher eventPublisher;
+    private final RepoService repoService; // inject RepoService
 
-    public BuildService(BuildRepository buildRepository, RepoRepository repoRepository) {
+    public BuildService(BuildRepository buildRepository,
+                        BuildEventPublisher eventPublisher,
+                        RepoService repoService) {
         this.buildRepository = buildRepository;
-        this.repoRepository = repoRepository;
+        this.eventPublisher = eventPublisher;
+        this.repoService = repoService;
     }
 
-    // Add build to repo
-    public Build addBuildToRepo(Long repoId, Build build) {
-        Repo repo = repoRepository.findById(repoId).orElse(null);
-        if (repo == null) return null;
-
-        build.setRepo(repo);
-
-// If status is null, set default to PENDING
-        if (build.getStatus() == null) {
-            build.setStatus(BuildStatus.valueOf(BuildStatus.PENDING.name()));
-        }
-
-// If startTime is null, set it to now
+    public Build saveBuild(Build build) {
         if (build.getStartTime() == null) {
             build.setStartTime(LocalDateTime.now());
         }
 
-// endTime can be null initially, it will be set when the build finishes
+        Build saved = buildRepository.save(build);
 
-        return buildRepository.save(build);
+        // 🔥 Publish real-time WebSocket update
+        eventPublisher.publishBuildUpdate(saved);
+
+        return saved;
     }
 
-    // Get all builds for repo
-    public List<Build> getBuildsForRepo(Long repoId) {
-        Repo repo = repoRepository.findById(repoId).orElse(null);
-        if (repo == null) return List.of();
+
+    public List<Build> getBuildsByRepo(Repo repo) {
         return buildRepository.findByRepoOrderByStartTimeDesc(repo);
     }
 
-    // Save build from webhook
-    public Build saveBuild(Build build) {
-        if (build.getStartTime() == null) build.setStartTime(LocalDateTime.now());
-        return buildRepository.save(build);
+    // Add a build to a repository by repoId
+    public Build addBuildToRepo(Long repoId, Build build) {
+        Repo repo = repoService.getRepoById(repoId);
+        if (repo == null) {
+            return null; // repo not found
+        }
+
+        build.setRepo(repo);
+        build.setStatus(BuildStatus.PENDING); // default status
+        return saveBuild(build);
     }
 
+    // Get builds for a repository by repoId
+    public List<Build> getBuildsForRepo(Long repoId) {
+        Repo repo = repoService.getRepoById(repoId);
+        if (repo == null) {
+            return List.of(); // return empty list if repo not found
+        }
+        return getBuildsByRepo(repo);
+    }
 }
