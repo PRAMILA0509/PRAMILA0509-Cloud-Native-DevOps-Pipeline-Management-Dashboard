@@ -7,5 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface BuildRepository extends JpaRepository<Build, Long> {
-    List<Build> findTop10ByRepoOrderByTimestampDesc(Repo repo);
+
+    List<Build> findByRepoOrderByStartTimeDesc(Repo repo);
 }

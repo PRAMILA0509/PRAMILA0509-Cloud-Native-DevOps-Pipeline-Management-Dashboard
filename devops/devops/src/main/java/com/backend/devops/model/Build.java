@@ -1,81 +1,89 @@
 package com.backend.devops.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "builds")
-public class Build {
+public class Build{
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "repo_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "repo_id")
+    @JsonIgnore
     private Repo repo;
 
+    @Setter
     private String sha;
-    private String status; // SUCCESS / FAILED / PENDING
+
+    @Setter
+    @Enumerated(EnumType.STRING)
+    private BuildStatus status;
+
+    @Setter
     private String message;
-    private LocalDateTime timestamp;
 
-    public Build() {}
+    @Setter
+    private LocalDateTime startTime;
+    @Setter
+    private LocalDateTime endTime;
 
-    public Build(Repo repo, String sha, String status, String message, LocalDateTime timestamp) {
+    // ✅ REQUIRED by JPA
+    public Build() {
+    }
+
+    // ✅ Constructor for creating new builds (API / webhook)
+    public Build(Repo repo,
+                 String sha,
+                 BuildStatus status,
+                 String message,
+                 LocalDateTime startTime) {
+
         this.repo = repo;
         this.sha = sha;
         this.status = status;
         this.message = message;
-        this.timestamp = timestamp;
+        this.startTime = startTime;
     }
+
+    // -------- Getters & Setters --------
 
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public Repo getRepo() {
         return repo;
     }
 
-    public void setRepo(Repo repo) {
-        this.repo = repo;
-    }
-
     public String getSha() {
         return sha;
     }
 
-    public void setSha(String sha) {
-        this.sha = sha;
-    }
-
-    public String getStatus() {
+    public BuildStatus getStatus() {
         return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
     }
 
     public String getMessage() {
         return message;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public LocalDateTime getStartTime() {
+        return startTime;
     }
 
-    public LocalDateTime getTimestamp() {
-        return timestamp;
+    public LocalDateTime getEndTime() {
+        return endTime;
     }
 
-    public void setTimestamp(LocalDateTime timestamp) {
-        this.timestamp = timestamp;
+    public void setRepo(Repo repo) {
+        this.repo = repo;
     }
 }

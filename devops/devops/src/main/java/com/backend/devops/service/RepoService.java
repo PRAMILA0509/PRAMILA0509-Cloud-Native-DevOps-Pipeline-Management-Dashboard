@@ -16,14 +16,10 @@ public class RepoService {
     }
 
     public Repo saveRepo(Repo repo) {
-        // Validation to prevent null values
-        if (repo.getName() == null || repo.getName().isEmpty()) {
-            throw new IllegalArgumentException("Repo name cannot be null or empty");
+        // Optional: check duplicate repo by name
+        if (repoRepository.existsByName(repo.getName())) {
+            throw new IllegalArgumentException("Repository already exists");
         }
-        if (repo.getUrl() == null || repo.getUrl().isEmpty()) {
-            throw new IllegalArgumentException("Repo URL cannot be null or empty");
-        }
-
         return repoRepository.save(repo);
     }
 
@@ -32,12 +28,10 @@ public class RepoService {
     }
 
     public Repo getRepoById(Long id) {
-        return repoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Repo not found"));
-    }
-    public Repo getRepoByName(String name) {
-        return repoRepository.findByName(name)
-                .orElseThrow(() -> new RuntimeException("Repo not found"));
+        return repoRepository.findById(id).orElse(null);
     }
 
+    public Repo getRepoByName(String name) {
+        return repoRepository.findByName(name).orElse(null);
+    }
 }
