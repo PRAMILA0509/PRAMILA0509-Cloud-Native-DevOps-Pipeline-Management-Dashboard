@@ -4,9 +4,6 @@ import com.backend.devops.model.Build;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
-/**
- * Publishes real-time Build updates to WebSocket clients
- */
 @Component
 public class BuildEventPublisher {
 
@@ -17,18 +14,20 @@ public class BuildEventPublisher {
     }
 
     public void publishBuildUpdate(Build build) {
+
         if (build == null) {
-            throw new IllegalArgumentException("Build cannot be null.");
+            throw new IllegalArgumentException("Build cannot be null");
         }
         if (build.getRepo() == null || build.getRepo().getId() == null) {
-            throw new IllegalStateException("Build must have a repo with a valid ID.");
+            throw new IllegalStateException("Build must be associated with a Repo");
         }
 
         BuildDTO dto = new BuildDTO(
                 build.getId(),
                 build.getSha(),
+                build.getCommitAuthor(),
+                build.getCommitMessage(),
                 build.getStatus(),
-                build.getMessage(),
                 build.getStartTime(),
                 build.getEndTime(),
                 build.getRepo().getId()

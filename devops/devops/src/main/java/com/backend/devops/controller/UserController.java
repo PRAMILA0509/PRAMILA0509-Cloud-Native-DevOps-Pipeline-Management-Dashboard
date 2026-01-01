@@ -19,14 +19,12 @@ public class UserController {
         this.userService = userService;
     }
 
-    // Sign-up
+
     @PostMapping
     public ResponseEntity<User> register(@RequestBody User user) {
         User savedUser = userService.saveUser(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
     }
-
-    // Login (no JWT yet)
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User user) {
         User loggedIn = userService.login(user.getEmail(), user.getPassword());
@@ -36,8 +34,6 @@ public class UserController {
         }
         return ResponseEntity.ok(loggedIn);
     }
-
-    // Get all users (optional, admin view)
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());

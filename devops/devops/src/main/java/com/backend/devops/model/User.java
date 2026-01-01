@@ -1,7 +1,6 @@
 package com.backend.devops.model;
 
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 
 @Entity
@@ -22,20 +21,15 @@ public class User {
 
     private String role = "DEVELOPER";
 
+    // 🔥 GitHub username (used by webhook)
+    @Column(unique = true)
+    private String githubUsername;
+
+    @ManyToOne
+    @JoinColumn(name = "team_id")
+    private Team team;
+
     private LocalDateTime createdAt = LocalDateTime.now();
-
-    public User(Long id, String name, String email, String password, String role, LocalDateTime createdAt) {
-        this.id = id;
-        this.name = name;
-        this.email = email;
-        this.password = password;
-        this.role = role;
-        this.createdAt = createdAt;
-    }
-
-    public User(){
-
-    }
 
     public Long getId() {
         return id;
@@ -75,6 +69,22 @@ public class User {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getGithubUsername() {
+        return githubUsername;
+    }
+
+    public void setGithubUsername(String githubUsername) {
+        this.githubUsername = githubUsername;
+    }
+
+    public Team getTeam() {
+        return team;
+    }
+
+    public void setTeam(Team team) {
+        this.team = team;
     }
 
     public LocalDateTime getCreatedAt() {

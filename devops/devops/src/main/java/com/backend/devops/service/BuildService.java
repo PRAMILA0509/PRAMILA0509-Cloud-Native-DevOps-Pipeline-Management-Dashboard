@@ -15,7 +15,7 @@ public class BuildService {
 
     private final BuildRepository buildRepository;
     private final BuildEventPublisher eventPublisher;
-    private final RepoService repoService; // inject RepoService
+    private final RepoService repoService;
 
     public BuildService(BuildRepository buildRepository,
                         BuildEventPublisher eventPublisher,
@@ -25,42 +25,61 @@ public class BuildService {
         this.repoService = repoService;
     }
 
+
     public Build saveBuild(Build build) {
         if (build.getStartTime() == null) {
             build.setStartTime(LocalDateTime.now());
         }
 
-        Build saved = buildRepository.save(build);
+        Build savedBuild = buildRepository.save(build);
 
-        // 🔥 Publish real-time WebSocket update
-        eventPublisher.publishBuildUpdate(saved);
 
-        return saved;
+        eventPublisher.publishBuildUpdate(savedBuild);
+
+        return savedBuild;
     }
 
 
-    public List<Build> getBuildsByRepo(Repo repo) {
+    public List<Build> getBuildsForRepo(Long repoId) {
+        Repo repo = repoService.getRepoById(repoId);
         return buildRepository.findByRepoOrderByStartTimeDesc(repo);
     }
 
-    // Add a build to a repository by repoId
-    public Build addBuildToRepo(Long repoId, Build build) {
+
+    public Build getLatestBuildForRepo(Long repoId) {
         Repo repo = repoService.getRepoById(repoId);
-        if (repo == null) {
-            return null; // repo not found
+
+        return buildRepository
+                .findTopByRepoOrderByStartTimeDesc(repo)
+                .orElse(null);
+    }
+
+
+    public Build getBuildById(Long buildId) {
+        return buildRepository.findById(buildId)
+                .orElseThrow(() -> new RuntimeException("Build not found with id: " + buildId));
+    }
+
+
+    public Build updateBuildStatus(Long buildId, BuildStatus status) {
+        Build build = buildRepository.findById(buildId)
+                .orElseThrow(() -> new RuntimeException("Build not found"));
+
+        build.setStatus(status);
+
+        if (status != BuildStatus.RUNNING) {
+            build.setEndTime(LocalDateTime.now());
         }
 
-        build.setRepo(repo);
-        build.setStatus(BuildStatus.PENDING); // default status
         return saveBuild(build);
     }
 
-    // Get builds for a repository by repoId
-    public List<Build> getBuildsForRepo(Long repoId) {
-        Repo repo = repoService.getRepoById(repoId);
-        if (repo == null) {
-            return List.of(); // return empty list if repo not found
-        }
-        return getBuildsByRepo(repo);
+    public Long getLatestBuildIdForBranch(String branch) {
+        Build build = buildRepository
+                .findTopByBranchAndStatusOrderByStartTimeDesc(branch, BuildStatus.SUCCESS)
+                .orElseThrow(() -> new RuntimeException("No successful build found for branch: " + branch));
+        return build.getId();
     }
+
+
 }

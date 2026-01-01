@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/webhook")
+@RequestMapping("/webhook/github")
 @CrossOrigin(origins = "http://localhost:3000")
 public class WebhookController {
 

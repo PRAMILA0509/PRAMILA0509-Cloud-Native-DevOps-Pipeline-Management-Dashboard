@@ -1,0 +1,52 @@
+name: Fullstack CD
+
+# Trigger CD only when CI workflow completes successfully
+on:
+  workflow_run:
+    workflows: ["Fullstack CI"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    # Only run CD if the CI workflow succeeded
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Set up JDK for backend if deployment requires build (optional)
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      # Optional: Set up Node if frontend build/deploy needed
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Pull Docker image / build Docker container (if using Docker)
+      - name: Build and Push Docker image
+        run: |
+          docker build -t myapp:latest .
+          docker tag myapp:latest mydockerhubusername/myapp:latest
+          echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+          docker push mydockerhubusername/myapp:latest
+
+      # Deploy to server (example with SSH)
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v0.1.9
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            cd /var/www/myapp
+            docker pull mydockerhubusername/myapp:latest
+            docker-compose down
+            docker-compose up -d

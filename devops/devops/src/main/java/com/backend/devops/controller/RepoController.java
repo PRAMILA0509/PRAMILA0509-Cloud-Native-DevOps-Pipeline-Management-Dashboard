@@ -19,10 +19,24 @@ public class RepoController {
         this.repoService = repoService;
     }
 
-    // Create repo
-    @PostMapping
-    public ResponseEntity<Repo> createRepo(@RequestBody Repo repo) {
-        Repo savedRepo = repoService.saveRepo(repo);
+    // ✅ Register repo for a user (team auto-created)
+    @PostMapping("/register/{userId}")
+    public ResponseEntity<Repo> registerRepo(
+            @PathVariable Long userId,
+            @RequestBody Repo repo
+    ) {
+        if (repo.getName() == null || repo.getUrl() == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        Repo savedRepo = repoService.registerRepoForUser(
+                userId,
+                repo.getName(),
+                repo.getUrl(),
+                repo.getOwner(),
+                repo.getDefaultBranch()
+        );
+
         return ResponseEntity.status(HttpStatus.CREATED).body(savedRepo);
     }
 
@@ -35,8 +49,6 @@ public class RepoController {
     // Get repo by ID
     @GetMapping("/{id}")
     public ResponseEntity<Repo> getRepoById(@PathVariable Long id) {
-        Repo repo = repoService.getRepoById(id);
-        if (repo == null) return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(repo);
+        return ResponseEntity.ok(repoService.getRepoById(id));
     }
 }

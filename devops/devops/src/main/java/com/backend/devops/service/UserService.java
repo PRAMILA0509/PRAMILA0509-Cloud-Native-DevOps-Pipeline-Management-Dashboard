@@ -15,13 +15,12 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    // Sign-up / save user
     public User saveUser(User user) {
-        // Optional: hash password here later
+
         return userRepository.save(user);
     }
 
-    // Login (no JWT)
+
     public User login(String email, String password) {
         return userRepository.findByEmailAndPassword(email, password).orElse(null);
     }

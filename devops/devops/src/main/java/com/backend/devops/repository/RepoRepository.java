@@ -9,6 +9,8 @@ public interface RepoRepository extends JpaRepository<Repo, Long> {
 
     // Find repo by name
     Optional<Repo> findByName(String name);
+    Optional<Repo> findByDefaultBranch(String branch);
+    Optional<Repo> findByBranchesContaining(String branch);
 
     // Check if repo exists by name
     boolean existsByName(String name);
