@@ -1,8 +1,4 @@
-//import { useEffect, useState } from "react";
 import "../styles/Builds.css";
-import { loginUser, getAllRepos, getBuildsForRepo } from "../services/api";
-
-import api from "../services/api";
 import Navbar from "./Navbar";
 
 function Builds() {

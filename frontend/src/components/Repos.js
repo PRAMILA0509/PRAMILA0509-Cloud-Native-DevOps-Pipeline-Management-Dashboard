@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { registerRepo, getAllRepos } from '../services/api';
-import { Plus, Github, ExternalLink } from 'lucide-react';
+import { Plus, ExternalLink } from 'lucide-react';
 
 const Repos = ({ currentUser }) => {
     const [repos, setRepos] = useState([]);

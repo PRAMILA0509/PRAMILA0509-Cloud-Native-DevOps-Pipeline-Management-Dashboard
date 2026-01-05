@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { getAllRepos, getBuildsForRepo } from '../services/api';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import PipelineCard from './PipelineCard';
-import { Clock, User, CheckCircle, PlayCircle, AlertCircle } from 'lucide-react';
+import { User, CheckCircle, PlayCircle, AlertCircle } from 'lucide-react';
+
 import '../styles/Dashboard.css';
 
 const Overview = () => {
@@ -13,12 +14,20 @@ const Overview = () => {
         const loadData = async () => {
             try {
                 const repoRes = await getAllRepos();
-                setPipelines(repoRes.data);
-                
-                // Fetch recent history for the first repo as a summary
-                if (repoRes.data.length > 0) {
-                    const buildRes = await getBuildsForRepo(repoRes.data[0].id);
-                    setAllBuilds(buildRes.data);
+                const repos = repoRes.data || [];
+                setPipelines(repos);
+
+                // Fetch builds for all repos in parallel and flatten
+                if (repos.length > 0) {
+                    const promises = repos.map(r => getBuildsForRepo(r.id).then(res => res.data || []).catch(() => []));
+                    const results = await Promise.all(promises);
+                    const merged = results.flat();
+
+                    // Sort by startTime desc and keep most recent 20 builds
+                    const sorted = merged.sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
+                    setAllBuilds(sorted.slice(0, 20));
+                } else {
+                    setAllBuilds([]);
                 }
             } catch (err) {
                 console.error("Error loading overview data", err);
@@ -28,10 +37,27 @@ const Overview = () => {
     }, []);
 
     const COLORS = ['#10b981', '#ef4444'];
-    const chartData = [
-        { name: 'Success', value: 85 },
-        { name: 'Failed', value: 15 },
-    ];
+
+    // Derive chart data from current builds
+    const chartData = useMemo(() => {
+        if (!allBuilds || allBuilds.length === 0) return [
+            { name: 'Success', value: 0 },
+            { name: 'Failed', value: 0 },
+        ];
+        const success = allBuilds.filter(b => b.status === 'SUCCESS').length;
+        const failed = allBuilds.filter(b => b.status === 'FAILED' || b.status === 'ERROR').length;
+        const other = allBuilds.length - success - failed;
+        // Normalize to percentages for display if needed
+        return [
+            { name: 'Success', value: success },
+            { name: 'Failed', value: failed + other },
+        ];
+    }, [allBuilds]);
+
+    const statusClass = (s) => {
+        if (!s) return 'unknown';
+        return s.toLowerCase();
+    };
 
     return (
         <div className="overview-container">
@@ -42,17 +68,21 @@ const Overview = () => {
                     <ResponsiveContainer width="100%" height={180}>
                         <PieChart>
                             <Pie data={chartData} innerRadius={60} outerRadius={80} dataKey="value" stroke="none">
-                                {chartData.map((e, i) => <Cell key={i} fill={COLORS[i]} />)}
+                                {chartData.map((e, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                             </Pie>
                             <Tooltip />
                         </PieChart>
                     </ResponsiveContainer>
                 </div>
-                
+
                 <div className="card stats-summary-card">
                     <div className="stat-item">
                         <span className="label">Total Repositories</span>
                         <span className="value">{pipelines.length}</span>
+                    </div>
+                    <div className="stat-item">
+                        <span className="label">Recent Builds</span>
+                        <span className="value">{allBuilds.length}</span>
                     </div>
                     <div className="stat-item">
                         <span className="label">System Status</span>
@@ -63,12 +93,13 @@ const Overview = () => {
 
             {/* Section 1: Build Tracking Table (SQL Data View) */}
             <section className="dashboard-section">
-                <h3>Build History Tracking</h3>
+                <h3>Build History (Recent)</h3>
                 <div className="table-container card">
                     <table className="build-table">
                         <thead>
                             <tr>
                                 <th>Build ID</th>
+                                <th>Repo</th>
                                 <th>Branch</th>
                                 <th>Author</th>
                                 <th>Commit Message</th>
@@ -77,20 +108,26 @@ const Overview = () => {
                             </tr>
                         </thead>
                         <tbody>
+                            {allBuilds.length === 0 && (
+                                <tr><td colSpan={7} style={{textAlign:'center', padding: '18px'}}>No recent builds</td></tr>
+                            )}
+
                             {allBuilds.map(build => (
                                 <tr key={build.id}>
                                     <td>#{build.id}</td>
-                                    <td><code className="branch-code">{build.branch}</code></td>
-                                    <td><div className="user-cell"><User size={14}/> {build.commitAuthor}</div></td>
-                                    <td className="msg-cell">{build.commitMessage}</td>
+                                    <td>{build.repo?.name || '-'}</td>
+                                    <td><code className="branch-code">{build.branch || '-'}</code></td>
+                                    <td><div className="user-cell"><User size={14}/> {build.commitAuthor || '-'}</div></td>
+                                    <td className="msg-cell" title={build.commitMessage || ''}>{build.commitMessage || '-'}</td>
                                     <td>
-                                        <span className={`status-badge ${build.status.toLowerCase()}`}>
+                                        <span className={`status-badge ${statusClass(build.status)}`}>
                                             {build.status === 'SUCCESS' && <CheckCircle size={12}/>}
                                             {build.status === 'RUNNING' && <PlayCircle className="spin" size={12}/>}
-                                            {build.status}
+                                            {(build.status === 'FAILED' || build.status === 'ERROR') && <AlertCircle size={12}/>}
+                                            {build.status || 'UNKNOWN'}
                                         </span>
                                     </td>
-                                    <td className="time-cell">{new Date(build.startTime).toLocaleString()}</td>
+                                    <td className="time-cell">{build.startTime ? new Date(build.startTime).toLocaleString() : '-'}</td>
                                 </tr>
                             ))}
                         </tbody>

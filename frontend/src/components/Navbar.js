@@ -1,6 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
 import "../styles/Navbar.css";
-import { loginUser, getAllRepos, getBuildsForRepo } from "../services/api";
 
 export default function Navbar() {
   const navigate = useNavigate();
