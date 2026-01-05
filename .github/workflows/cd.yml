@@ -28,7 +28,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./Dockerfile
+          file: ./devops/devops/Dockerfile
           push: true
           # Tags the image using your secret username for a permanent URL
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/myapp:latest
