@@ -1,8 +1,8 @@
 .flow-container {
   display: flex;
   align-items: center;
-  gap: 0; /* Important for the connector lines */
-  padding: 20px 0;
+  gap: 8px; /* Increased gap for better spacing */
+  padding: 8px 0;
 }
 
 .node {
@@ -13,12 +13,12 @@
   justify-content: center;
   font-size: 0.75rem;
   font-weight: 700;
-  border: 2px solid #e2e8f0;
-  background: #f1f5f9;
-  color: #64748b;
+  border: 1px solid #e6eef7; /* Lighter border to match new design */
+  background: #f8fafc; /* Slightly off-white background */
+  color: #334155; /* Darker text color */
   position: relative;
   z-index: 2;
-  border-radius: 6px;
+  border-radius: 50%; /* Circular nodes */
 }
 
 /* Connecting Lines between nodes */
@@ -27,16 +27,32 @@
   position: absolute;
   right: -25px;
   width: 25px;
-  height: 2px;
-  background: #e2e8f0;
+  height: 3px; /* Thicker line */
+  background: #e9eef7; /* Lighter line color */
   z-index: 1;
 }
 
-.node.success { background: #ecfdf5; color: #059669; border-color: #10b981; }
-.node.failed { background: #fef2f2; color: #dc2626; border-color: #ef4444; }
-.node.started { 
+/* States for the nodes */
+.node.success {
+  background: #ecfdf5;
+  color: #065f46; /* Darker green for success text */
+  border-color: #10b981;
+}
+.node.failed {
+  background: #fff1f2;
+  color: #9f1239; /* Darker red for failed text */
+  border-color: #ef4444;
+}
+.node.started {
   background: #eff6ff; 
-  color: #2563eb; 
-  border-color: #3b82f6; 
+  color: #1e40af; /* Darker blue for running text */
+  border-color: #3b82f6;
   animation: pulse-border 2s infinite; 
+}
+
+/* Keyframes for the pulse animation */
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+  100% { transform: scale(1); }
 }
