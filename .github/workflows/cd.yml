@@ -1,50 +1,46 @@
-name: Fullstack CD
+name: Continuous Deployment
 
 on:
-  workflow_run:
-    workflows: ["Fullstack CI"]
-    types:
-      - completed
+  push:
+    branches:
+      - main  # Adjust this if your default branch is 'master'
 
 jobs:
-  deploy:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    runs-on: ubuntu-latest # Using Ubuntu is more stable for Docker commands
+  build-and-deploy:
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      # 1. Pull the code from GitHub
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Log in using the official Docker action (Securely handles credentials)
-      - name: Login to Docker Hub
+      # 2. Set up Java 21 environment for the build
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      # 3. Log in to Docker Hub
+      - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          # Use the exact names you just created in GitHub Secrets
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # Build and Push using official action (Fixes context and path issues)
-      - name: Build and Push Docker image
+      # 4. Build and Push the Docker image
+      - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: .
+          # This is the fix: Look inside the subfolder for pom.xml and src/
+          context: ./devops/devops
+          # Path to the Dockerfile
           file: ./devops/devops/Dockerfile
           push: true
-          # Tags the image using your secret username for a permanent URL
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/myapp:latest
+          # Replace 'your-docker-repo' with your actual Docker Hub repository name
+          tags: ${{ secrets.DOCKER_USERNAME }}/devops-pipeline:latest
 
-      # Deploy to your server via SSH
-      - name: Deploy to server
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          script: |
-            # Pull the new image from Docker Hub
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/myapp:latest
-            # Stop and remove the old container to refresh the system
-            docker stop myapp || true
-            docker rm myapp || true
-            # Run the new container on port 8080
-            docker run -d --name myapp -p 8080:8080 ${{ secrets.DOCKERHUB_USERNAME }}/myapp:latest
+      # 5. Optional: Trigger Render to Redeploy
+      # - name: Trigger Render Deploy
+      #   run: curl ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
