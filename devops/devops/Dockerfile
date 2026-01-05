@@ -1,18 +1,25 @@
-# Stage 1: Build the application using Maven
-FROM maven:3.8.4-openjdk-17-slim AS build
+# Stage 1: Build the application using Maven with Java 21
+FROM maven:3.9.6-eclipse-temurin-21 AS build
 WORKDIR /app
-# Copy the pom.xml and source code
+
+# Copy only the pom.xml first to leverage Docker cache for dependencies
 COPY pom.xml .
+RUN mvn dependency:go-offline -B
+
+# Copy the source code and build the JAR
 COPY src ./src
-# Build the JAR file, skipping tests to speed up deployment
 RUN mvn clean package -DskipTests
 
-# Stage 2: Run the application
-FROM eclipse-temurin:17-jdk-focal
+# Stage 2: Run the application using Java 21 JRE
+FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
+
 # Copy the built JAR from the 'build' stage
-# Note: Ensure 'devops' matches your spring.application.name or artifactId
+# This wildcard ensures it finds your JAR regardless of the project name
 COPY --from=build /app/target/*.jar app.jar
-# Render uses the PORT environment variable; Spring Boot will listen on it
+
+# Standard port for Spring Boot
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+
+# Run the application with optimized memory settings for cloud environments
+ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75.0", "-jar", "app.jar"]
