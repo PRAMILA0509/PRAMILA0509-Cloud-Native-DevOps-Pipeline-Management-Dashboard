@@ -9,31 +9,31 @@ on:
 jobs:
   deploy:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    # Changed to ubuntu-latest for better Docker support
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest # Using Ubuntu is more stable for Docker commands
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Log in using the official action (Fixes the --username error)
+      # Log in using the official Docker action (Securely handles credentials)
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
+          # Use the exact names you just created in GitHub Secrets
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # Build and Push using official actions (Fixes the Dockerfile path error)
+      # Build and Push using official action (Fixes context and path issues)
       - name: Build and Push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
-          # If your Dockerfile is in a subfolder, change context to: ./backend
           file: ./Dockerfile
           push: true
+          # Tags the image using your secret username for a permanent URL
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/myapp:latest
 
-      # Deploy to server
+      # Deploy to your server via SSH
       - name: Deploy to server
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -41,10 +41,10 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            # Use the permanent URL from your hosting provider
+            # Pull the new image from Docker Hub
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/myapp:latest
-            # Stop existing container if it exists
+            # Stop and remove the old container to refresh the system
             docker stop myapp || true
             docker rm myapp || true
-            # Run new container
+            # Run the new container on port 8080
             docker run -d --name myapp -p 8080:8080 ${{ secrets.DOCKERHUB_USERNAME }}/myapp:latest
