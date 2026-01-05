@@ -1,0 +1,13 @@
+.builds {
+  padding: 30px;
+}
+
+.success {
+  color: #16a34a;
+  font-weight: bold;
+}
+
+.failed {
+  color: #dc2626;
+  font-weight: bold;
+}

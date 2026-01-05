@@ -2,6 +2,7 @@ package com.backend.devops.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "users")
@@ -27,6 +28,7 @@ public class User {
 
     @ManyToOne
     @JoinColumn(name = "team_id")
+    @JsonIgnoreProperties("teamLead")
     private Team team;
 
     private LocalDateTime createdAt = LocalDateTime.now();

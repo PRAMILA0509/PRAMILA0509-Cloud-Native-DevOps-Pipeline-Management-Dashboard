@@ -1,6 +1,7 @@
 package com.backend.devops.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -33,8 +34,8 @@ public class Repo {
     private List<String> branches = new ArrayList<>();
 
     @OneToMany(mappedBy = "repo", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
-    private List<Build> builds;
+    @JsonManagedReference
+    private List<Build> builds = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "team_id", nullable = false)
@@ -42,7 +43,7 @@ public class Repo {
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    // ---------------- Constructors ----------------
+
 
     public Repo() {}
 

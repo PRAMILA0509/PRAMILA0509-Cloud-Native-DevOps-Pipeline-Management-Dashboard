@@ -1,5 +1,6 @@
 package com.backend.devops.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
@@ -15,7 +16,7 @@ public class Build {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "repo_id", nullable = false)
-    @JsonIgnore
+    @JsonBackReference
     private Repo repo;
 
     private String sha;

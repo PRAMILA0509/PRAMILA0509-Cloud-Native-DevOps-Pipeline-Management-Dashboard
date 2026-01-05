@@ -1,0 +1,46 @@
+.teams-container {
+    padding: 40px;
+}
+.teams-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+.add-btn {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+.teams-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+.team-card {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #eef2f6;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.user-avatar {
+    width: 50px;
+    height: 50px;
+    background: #f1f5f9;
+    color: #3b82f6;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+.user-info h3 { margin: 0; font-size: 1.1rem; }
+.role { color: #64748b; font-size: 0.85rem; margin: 4px 0; }
+.github { color: #3b82f6; font-size: 0.8rem; font-family: monospace; }

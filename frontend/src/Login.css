@@ -1,10 +1,107 @@
-.login-container{
-  max-width: 400px;
-  max-height: 800px;
-  margin: 100px auto;
-  padding: 30px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-  border-radius: 10px;
+/* Full page layout */
+.login-page {
+  display: flex;
+  height: 100vh;
+  font-family: "Inter", sans-serif;
+  background: #f8fafc;
+}
+
+/* Left branding section */
+.login-left {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-left h1 {
+  font-size: 48px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+/* Right section */
+.login-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Login card */
+.login-card {
+  background: white;
+  padding: 40px;
+  width: 360px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+}
+
+.login-card h2 {
+  margin-bottom: 20px;
+  font-size: 28px;
+  color: #0f172a;
+}
+
+/* Labels */
+.login-card label {
+  font-size: 14px;
+  margin-bottom: 6px;
+  color: #334155;
+}
+
+/* Inputs */
+.login-card input {
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+/* Forgot password */
+.forgot {
+  font-size: 13px;
+  color: #2563eb;
+  margin-bottom: 20px;
+  cursor: pointer;
+}
+
+/* Button */
+.login-card button {
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  color: white;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.login-card button:hover {
+  opacity: 0.95;
+}
+
+/* Signup text */
+.signup {
+  margin-top: 16px;
+  font-size: 14px;
   text-align: center;
-  font-family: Arial, sans-serif;
+  color: #475569;
+}
+
+.signup span {
+  color: #2563eb;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+/* Error */
+.error {
+  color: #ef4444;
+  font-size: 14px;
+  margin-bottom: 12px;
 }
