@@ -11,7 +11,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/users")
 // Allows local dev (3000) and  production Vercel URL
-@CrossOrigin(origins = {"http://localhost:3000", "https://your-frontend.vercel.app"})
+//@CrossOrigin(origins = {"http://localhost:3000", "https://your-frontend.vercel.app"})
 public class UserController {
 
     private final UserService userService;

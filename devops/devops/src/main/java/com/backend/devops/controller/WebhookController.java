@@ -8,7 +8,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/webhook/github")
-@CrossOrigin(origins = "http://localhost:3000")
+//@CrossOrigin(origins = "http://localhost:3000")
 public class WebhookController {
 
     private final WebhookService webhookService;

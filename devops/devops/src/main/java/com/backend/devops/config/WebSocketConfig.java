@@ -10,8 +10,12 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        // Endpoint for WebSocket handshake
-        registry.addEndpoint("/ws").setAllowedOriginPatterns("*").withSockJS();
+        registry.addEndpoint("/ws")
+                .setAllowedOriginPatterns(
+                        "http://localhost:3000",
+                        "https://pramila-0509-cloud-native-dev-ops-p.vercel.app"
+                )
+                .withSockJS();
     }
 
     @Override

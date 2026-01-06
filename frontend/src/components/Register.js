@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import '../styles/Login.css'; // Reusing styles for consistency
 import axios from 'axios';
-
+import { registerUser } from '../services/api';
 const Register = ({ onSwitchToLogin }) => {
   const [formData, setFormData] = useState({
     name: '',
@@ -13,8 +13,7 @@ const Register = ({ onSwitchToLogin }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Calls the @PostMapping register method in Spring Boot
-      await axios.post('http://localhost:8080/api/users', formData);
+      await registerUser(formData);
       alert("Registration successful! You can now login.");
       onSwitchToLogin();
     } catch (err) {
