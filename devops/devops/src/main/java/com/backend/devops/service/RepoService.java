@@ -66,8 +66,8 @@ public class RepoService {
     }
 
     public Long getRepoIdByBranch(String branch) {
-        // Example: find repo by branch name
-        Repo repo = repoRepository.findByBranchesContaining(branch)
+        // UPDATED: Now calls findByBranches_Name to match the Repository change
+        Repo repo = repoRepository.findByBranches_Name(branch)
                 .orElseThrow(() -> new RuntimeException("No repo found for branch: " + branch));
         return repo.getId();
     }
