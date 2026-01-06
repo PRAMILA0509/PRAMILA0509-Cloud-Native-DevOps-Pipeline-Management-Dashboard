@@ -10,7 +10,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "http://localhost:3000")
+// Allows local dev (3000) and  production Vercel URL
+@CrossOrigin(origins = {"http://localhost:3000", "https://your-frontend.vercel.app"})
 public class UserController {
 
     private final UserService userService;
@@ -19,9 +20,9 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping("/")
-    public String healthCheck() {
-        return "Backend is running and database is connected!";
+    @GetMapping("/health")
+    public ResponseEntity<String> healthCheck() {
+        return ResponseEntity.ok("Backend is LIVE and connected to Aiven MySQL!");
     }
 
     @PostMapping
@@ -29,6 +30,7 @@ public class UserController {
         User savedUser = userService.saveUser(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
     }
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User user) {
         User loggedIn = userService.login(user.getEmail(), user.getPassword());
@@ -38,6 +40,7 @@ public class UserController {
         }
         return ResponseEntity.ok(loggedIn);
     }
+
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());

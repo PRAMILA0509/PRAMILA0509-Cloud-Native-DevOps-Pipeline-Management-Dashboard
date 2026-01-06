@@ -1,29 +1,27 @@
 import React, { useState } from 'react';
 import '../styles/Login.css';
-import { loginUser } from '../services/api'; // This uses the axios.create instance you shared
+import { loginUser } from '../services/api';
 
 const Login = ({ onLoginSuccess, onSwitchToRegister }) => {
-  // 1. Initialize state for the input fields
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
-      // 2. Prepare the payload to match @RequestBody User in Java
-      const credentials = { email, password }; 
-      
-      // 3. Call the API
+      const credentials = { email, password };
       const response = await loginUser(credentials);
-      
-      // 4. Extract data and move to dashboard
+
       console.log("Login Success:", response.data);
-      onLoginSuccess(response.data); 
+      onLoginSuccess(response.data);
     } catch (err) {
       console.error("Login Error:", err);
-      // Accessing the error message from your Spring Boot ResponseEntity
-      const errorMsg = err.response?.data || "Invalid email or password";
+      const errorMsg = err.response?.data || "Server connection failed. Check console.";
       alert("Login failed: " + errorMsg);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -37,29 +35,30 @@ const Login = ({ onLoginSuccess, onSwitchToRegister }) => {
         <form onSubmit={handleSubmit}>
           <div className="input-group">
             <label>Email</label>
-            <input 
-              type="email" 
-              value={email} 
-              onChange={(e) => setEmail(e.target.value)} 
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
-              required 
+              required
             />
           </div>
           <div className="input-group">
             <label>Password</label>
-            <input 
-              type="password" 
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)} 
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter your password"
-              required 
+              required
             />
           </div>
-          <button type="button" className="forgot-pass-btn">Forgot password?</button>
-          <button type="submit" className="login-btn">Login</button>
+          <button type="submit" className="login-btn" disabled={loading}>
+            {loading ? "Logging in..." : "Login"}
+          </button>
         </form>
         <p className="signup-text">
-          Don't have an account? 
+          Don't have an account?
           <button type="button" onClick={onSwitchToRegister} className="link-btn">Sign up</button>
         </p>
       </div>
