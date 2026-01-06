@@ -19,6 +19,10 @@ public class UserController {
         this.userService = userService;
     }
 
+    @GetMapping("/")
+    public String healthCheck() {
+        return "Backend is running and database is connected!";
+    }
 
     @PostMapping
     public ResponseEntity<User> register(@RequestBody User user) {
